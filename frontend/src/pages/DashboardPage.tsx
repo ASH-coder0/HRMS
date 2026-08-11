@@ -99,26 +99,52 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Department-wise employees</CardTitle>
-          </CardHeader>
-          <CardContent className="h-72">
-            {deptQuery.isLoading ? <Skeleton className="h-full w-full" /> : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={deptQuery.data || []} dataKey="count" nameKey="department" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2}>
-                    {(deptQuery.data || []).map((_: any, i: number) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+        <Card className="w-full min-w-0">
+  <CardHeader>
+    <CardTitle>Department-wise employees</CardTitle>
+  </CardHeader>
+
+  <CardContent className="h-[320px] w-full min-w-0 px-2 sm:h-80 sm:px-6">
+    {deptQuery.isLoading ? (
+      <Skeleton className="h-full w-full" />
+    ) : (
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={deptQuery.data || []}
+            dataKey="count"
+            nameKey="department"
+            cx="50%"
+            cy="45%"
+            innerRadius="35%"
+            outerRadius="65%"
+            paddingAngle={2}
+          >
+            {(deptQuery.data || []).map((_: any, i: number) => (
+              <Cell
+                key={`cell-${i}`}
+                fill={COLORS[i % COLORS.length]}
+              />
+            ))}
+          </Pie>
+
+          <Tooltip />
+
+          <Legend
+            verticalAlign="bottom"
+            align="center"
+            layout="horizontal"
+            wrapperStyle={{
+              width: "100%",
+              fontSize: "12px",
+              lineHeight: "20px",
+            }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    )}
+  </CardContent>
+</Card>
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">

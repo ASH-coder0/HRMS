@@ -7,7 +7,7 @@ const designationServices = require('./designationServices');
 const attendanceServices = require('./attendanceServices');
 const leaveServices = require('./leaveServices');
 const dashboardServices = require('./dashboardServices');
-
+const notifications = require('./notificationServices')
 module.exports = {
   jwtServices,
   emailServices,
@@ -18,4 +18,5 @@ module.exports = {
   attendanceServices,
   leaveServices,
   dashboardServices,
+  notifications,
 };

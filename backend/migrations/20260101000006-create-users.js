@@ -3,59 +3,101 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable('notifications', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
-      email: {
+
+      user_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+
+      type: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
+      },
+
+      title: {
         type: Sequelize.STRING(150),
         allowNull: false,
-        unique: true,
       },
-      password: {
-        type: Sequelize.STRING(255),
+
+      message: {
+        type: Sequelize.TEXT,
         allowNull: false,
       },
-      role_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      employee_id: {
-        type: Sequelize.INTEGER,
+
+      featuredImage: {
+        type: Sequelize.STRING,
         allowNull: true,
       },
-      is_active: {
+
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+
+      publishStatus: {
+        type: Sequelize.ENUM('draft', 'published'),
+        allowNull: false,
+        defaultValue: 'draft',
+      },
+
+      author: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+
+      status: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+      },
+
+      publishDate: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
+      },
+
+      is_read: {
         type: Sequelize.BOOLEAN,
-        allowNull: true,
-        defaultValue: true,
+        allowNull: false,
+        defaultValue: false,
       },
-      last_login_at: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      reset_password_token: {
+
+      link: {
         type: Sequelize.STRING(255),
         allowNull: true,
       },
-      reset_password_expires: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
+
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
+
       updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
+        defaultValue: Sequelize.literal(
+          'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+        ),
       },
     });
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable('notifications');
   },
 };

@@ -7,6 +7,7 @@ const User = require('../../models/User');
 const Role = require('../../models/Role');
 const RefreshToken = require('../../models/RefreshToken');
 const CustomErrorHandler = require('../utils/CustomErrorHandler');
+const Employee = require('../../models/Employee');
 const {
   JWT_SECRET, JWT_EXPIRY, REFRESH_SECRET, REFRESH_EXPIRY, REACT_APP_URL,
 } = require('../config/constant');
@@ -24,6 +25,78 @@ const issueTokens = async (user) => {
   const refresh_token = jwtServices.generateToken(payload, REFRESH_SECRET, REFRESH_EXPIRY);
   await RefreshToken.create({ user_id: user.id, token: refresh_token });
   return { access_token, refresh_token, userInfo: payload };
+};
+
+//register
+const register = async (email, password) => {
+  // 1. Check whether the email belongs to an employee
+  const employee = await Employee.findOne({
+    where: { email },
+  });
+
+  if (!employee) {
+    throw CustomErrorHandler.validationError(
+      'This email is not registered as an employee. Please contact the administrator.'
+    );
+  }
+
+  // 2. Check whether this employee already has a login account
+  const existingUser = await User.findOne({
+    where: {
+      employee_id: employee.id,
+    },
+  });
+
+  if (existingUser) {
+    throw CustomErrorHandler.validationError(
+      'An account already exists for this employee.'
+    );
+  }
+
+  // 3. Also prevent duplicate email in users table
+  const existingEmail = await User.findOne({
+    where: { email },
+  });
+
+  if (existingEmail) {
+    throw CustomErrorHandler.validationError(
+      'An account already exists with this email.'
+    );
+  }
+
+  // 4. Get the employee's role
+  // Adjust this depending on your Employee model.
+  const roleId = employee.role_id;
+
+  if (!roleId) {
+    throw CustomErrorHandler.validationError(
+      'No role has been assigned to this employee.'
+    );
+  }
+
+  // 5. Create user account
+  const user = await User.create({
+    email: employee.email,
+    password,
+    employee_id: employee.id,
+    role_id: roleId,
+    is_active: true,
+  });
+
+  // 6. Fetch user with role for response
+  const createdUser = await User.findByPk(user.id, {
+    include: [Role],
+  });
+
+  return {
+    message: 'Registration successful. You can now login.',
+    user: {
+      user_id: createdUser.id,
+      email: createdUser.email,
+      role: createdUser.Role.name,
+      employee_id: createdUser.employee_id,
+    },
+  };
 };
 
 const login = async (email, password) => {
@@ -103,4 +176,4 @@ const me = async (userId) => {
   return user;
 };
 
-module.exports = { login, logout, refresh, forgotPassword, resetPassword, me };
+module.exports = { register,login, logout, refresh, forgotPassword, resetPassword, me };

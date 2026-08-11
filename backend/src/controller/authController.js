@@ -2,6 +2,18 @@ const { asyncHandler } = require('../middlewares');
 const { authServices } = require('../services');
 const { DATA_SAVED, LOGOUT } = require('../helpers/response');
 
+const register = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const result = await authServices.register(email, password);
+
+  return res.status(201).json({
+    status: true,
+    message: result.message,
+    data: result.user,
+  });
+});
+
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const result = await authServices.login(email, password);
@@ -37,4 +49,4 @@ const me = asyncHandler(async (req, res) => {
   return res.status(200).json({ status: true, message: 'User fetched successfully', data: user });
 });
 
-module.exports = { login, logout, refresh, forgotPassword, resetPassword, me };
+module.exports = { register,login, logout, refresh, forgotPassword, resetPassword, me };

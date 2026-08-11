@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Building2, Briefcase, CalendarCheck, Clock,
   Palmtree, Wallet, UserPlus, Award, GraduationCap, Boxes, Bell,
-  FileBarChart, Settings, ChevronsLeft, ChevronsRight, HeartPulse,
+  FileBarChart, Settings, ChevronsLeft, ChevronsRight, HeartPulse,MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -28,7 +28,7 @@ const NAV_ITEMS: NavItem[] = [
   // { label: 'Performance', to: '/performance', icon: Award, roles: ['super_admin', 'hr_manager', 'department_head', 'hospital_admin'] },
   // { label: 'Training', to: '/training', icon: GraduationCap },
   // { label: 'Assets', to: '/assets', icon: Boxes, roles: ['super_admin', 'hr_manager', 'hospital_admin'] },
-  // { label: 'Notifications', to: '/notifications', icon: Bell },
+  { label: 'Message', to: '/notifications', icon: MessageSquare },
   // { label: 'Reports', to: '/reports', icon: FileBarChart, roles: ['super_admin', 'hr_manager', 'hospital_admin', 'accountant'] },
   // { label: 'Settings', to: '/settings', icon: Settings, roles: ['super_admin', 'hospital_admin'] },
 ];

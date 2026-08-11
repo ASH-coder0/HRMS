@@ -17,6 +17,7 @@ const {
   attendanceRoutes,
   leaveRoutes,
   dashboardRoutes,
+  notificationRoutes,
 } = require('./routes');
 
 // CORS Options
@@ -51,7 +52,7 @@ app.use('/api/designations', designationRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leave', leaveRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
+app.use('/api/notifications', notificationRoutes);
 // Error handling & 404
 app.use(errorHandler);
 app.use((req, res) => {

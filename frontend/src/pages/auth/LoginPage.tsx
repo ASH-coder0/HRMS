@@ -61,6 +61,15 @@ export function LoginPage() {
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Sign in
               </Button>
+                <p className="mt-5 text-center text-sm text-muted-foreground">
+              doesnot have an account?{' '}
+              <Link
+                to="/register"
+                className="font-medium text-primary hover:underline"
+              >
+                register
+              </Link>
+            </p>
             </form>
             <p className="mt-5 text-center text-xs text-muted-foreground">
               Demo: admin@hospitalhrms.com / Admin@12345
