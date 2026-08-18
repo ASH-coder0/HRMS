@@ -7,9 +7,37 @@ const getAll = asyncHandler(async (req, res) => {
   return res.status(200).json(SUCCESS_API_FETCH(data, 'Employees fetched successfully'));
 });
 
-const getById = asyncHandler(async (req, res) => {
-  const data = await employeeServices.getById(req.params.id);
-  return res.status(200).json(SUCCESS_API_FETCH(data, 'Employee fetched successfully'));
+const getById = async (id) => {
+  const employee = await Employee.findByPk(id, {
+    include: [
+      { model: Department },
+      { model: Designation },
+      { model: Role },
+    ],
+  });
+
+  if (!employee) {
+    throw CustomErrorHandler.notFound('Employee not found');
+  }
+
+  return employee;
+};
+
+const getMe = asyncHandler(async (req, res) => {
+  const employeeId = req.user.employee_id;
+
+  if (!employeeId) {
+    return res.status(400).json({
+      success: false,
+      message: 'No employee is linked to this account',
+    });
+  }
+
+  const data = await employeeServices.getById(employeeId);
+
+  return res
+    .status(200)
+    .json(SUCCESS_API_FETCH(data, 'Profile fetched successfully'));
 });
 
 const create = asyncHandler(async (req, res) => {
@@ -53,6 +81,6 @@ const addExperience = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  getAll, getById, create, update, remove,
+  getAll, getById, getMe, create, update, remove,
   uploadPhoto, uploadDocument, addEmergencyContact, addEducation, addExperience,
 };

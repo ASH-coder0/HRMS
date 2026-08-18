@@ -7,6 +7,7 @@ export interface AuthUser {
   email: string;
   role: Role;
   employeeId: number | null;
+   employeeCode: string;
 }
 
 export interface Department {

@@ -7,6 +7,8 @@ const { MANAGE_EMPLOYEE_ROLES, HR_ROLES } = require('../constant');
 
 router.use(auth);
 
+router.get('/me', employeeController.getMe);
+
 router.get('/', employeeController.getAll);
 router.get('/:id', employeeController.getById);
 router.post('/', authorize(...MANAGE_EMPLOYEE_ROLES), employeeValidation.validateCreateEmployee, employeeController.create);

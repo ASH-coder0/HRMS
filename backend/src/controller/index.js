@@ -5,7 +5,10 @@ const designationController = require('./designationController');
 const attendanceController = require('./attendanceController');
 const leaveController = require('./leaveController');
 const dashboardController = require('./dashboardController');
-
+const  shiftController = require('./shiftController');
+const  salaryController = require('./salaryController');
+const recurimentController = require('./recurimentController')
+const trainingController = require("./trainingController")
 module.exports = {
   authController,
   employeeController,
@@ -14,4 +17,8 @@ module.exports = {
   attendanceController,
   leaveController,
   dashboardController,
+  shiftController,
+  salaryController,
+  recurimentController,
+  trainingController
 };

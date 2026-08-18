@@ -14,7 +14,7 @@ const Notification = sequelize.define(
     },
 
     user_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
 
@@ -85,4 +85,3 @@ Notification.belongsTo(User, {
 });
 
 module.exports = Notification;
-
