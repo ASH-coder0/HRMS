@@ -13,7 +13,10 @@ router.post(
   salaryController.saveSalaryController
 );
 
-//get 
+//get all
 router.get('/get', authorize(...HR_ROLES), salaryController.getSalaryController)
+
+//get current salary for a single employee (used to pre-fill edit form)
+router.get('/employee/:employee_id', authorize(...HR_ROLES), salaryController.getEmployeeCurrentSalaryController)
 
 module.exports = router;

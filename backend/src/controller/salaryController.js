@@ -1,6 +1,7 @@
 const {
   saveSalary,
   getEmployeeSalaryService,
+  getCurrentSalaryForEmployee,
 } = require("../services/salaryService");
 
 const saveSalaryController = async (req, res) => {
@@ -8,10 +9,18 @@ const saveSalaryController = async (req, res) => {
     const {
       employee_id,
       basic_salary,
+      basic_salary_multiplier,
       housing_allowance,
       transport_allowance,
       medical_allowance,
       other_allowance,
+      food_enabled,
+      food_allowance,
+      accommodation_enabled,
+      accommodation_allowance,
+      daily_working_hours,
+      ot_enabled,
+      ot_rate,
       effective_date,
     } = req.body;
 
@@ -25,10 +34,18 @@ const saveSalaryController = async (req, res) => {
     const salary = await saveSalary({
       employee_id,
       basic_salary,
+      basic_salary_multiplier,
       housing_allowance,
       transport_allowance,
       medical_allowance,
       other_allowance,
+      food_enabled,
+      food_allowance,
+      accommodation_enabled,
+      accommodation_allowance,
+      daily_working_hours,
+      ot_enabled,
+      ot_rate,
       effective_date,
     });
 
@@ -62,7 +79,23 @@ const getSalaryController = async (req, res) => {
   }
 };
 
+const getEmployeeCurrentSalaryController = async (req, res) => {
+  try {
+    const result = await getCurrentSalaryForEmployee(req.params.employee_id);
+
+    return res.status(result.status).json(result);
+  } catch (error) {
+    console.error("getEmployeeCurrentSalaryController:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   saveSalaryController,
   getSalaryController,
+  getEmployeeCurrentSalaryController,
 };

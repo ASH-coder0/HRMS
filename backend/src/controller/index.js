@@ -8,7 +8,9 @@ const dashboardController = require('./dashboardController');
 const  shiftController = require('./shiftController');
 const  salaryController = require('./salaryController');
 const recurimentController = require('./recurimentController')
-const trainingController = require("./trainingController")
+const trainingController = require("./trainingController");
+const economicYearController = require('./economicYearController');
+
 module.exports = {
   authController,
   employeeController,

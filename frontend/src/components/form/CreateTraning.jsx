@@ -125,8 +125,6 @@ const CreateTraning = ({ onFinished }) => {
       setLoadingAssignData(true);
 
       try {
-        // both endpoints assumed to follow the same paginated shape:
-        // { data: { items: [...], total, page, ... } }
         const [deptRes, empRes] = await Promise.all([
           api.get('/departments', { params: { limit: 100 } }),
           api.get('/employees', { params: { limit: 200, status: 'active' } }),
@@ -137,8 +135,7 @@ const CreateTraning = ({ onFinished }) => {
 
         setDepartments(deptList);
 
-        // derive unique roles from the employee list; swap for a real
-        // /roles endpoint if one exists
+     
         const uniqueRoles = [
           ...new Set(empList.map((e) => e.role).filter(Boolean)),
         ];
@@ -185,7 +182,7 @@ const CreateTraning = ({ onFinished }) => {
     try {
       await api.post(`/training/${createdTraining.id}/enroll`, payload);
       setAssignSuccess(true);
-      onFinished?.(createdTraining); // let a parent (e.g. table below) know to refresh, but don't navigate away
+      onFinished?.(createdTraining);
     } catch (err) {
       console.log('Error assigning training', err);
       setAssignError(
@@ -219,7 +216,6 @@ const CreateTraning = ({ onFinished }) => {
   };
 
   const handleSkipAssign = () => {
-    // training created without enrolling anyone yet — can enroll later from a detail page
     onFinished?.(createdTraining);
     resetFlow();
   };

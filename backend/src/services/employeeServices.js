@@ -82,7 +82,7 @@ const uploadPhoto = async (id, fileUrl) => {
   return employee;
 };
 
-// ✅ Keep these functions but they'll work with the models when created
+//  Keep these functions but they'll work with the models when created
 const uploadDocument = async (id, file, body) => {
   // This will work once Document model is created
   const Document = require('../../models/Document');
