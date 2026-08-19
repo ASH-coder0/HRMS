@@ -1,3 +1,4 @@
+// src/pages/notifications/NotificationPage.tsx
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, Check, CheckCheck, Pencil, Plus, Trash2, X } from 'lucide-react';
@@ -16,10 +17,11 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate } from '@/lib/utils';
 import type { Paginated } from '@/types';
+import { EmployeeSearchSelect } from '@/components/common/EmployeeSearchSelect';
 
 export interface NotificationRecord {
   id: number;
-  user_id: number;
+  user_id: string;          // store employee code (e.g., "EMP-0005")
   type: string;
   title: string;
   message: string;
@@ -42,7 +44,7 @@ const PUBLISH_VARIANT: Record<string, 'success' | 'secondary'> = {
 const MANAGE_ROLES = ['super_admin', 'hr_manager', 'hospital_admin', 'department_head'];
 
 const EMPTY_FORM = {
-  user_id: '',
+  user_id: '',    // will hold employee code
   type: '',
   title: '',
   message: '',
@@ -66,7 +68,6 @@ export function NotificationPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
 
-  // Admins see everyone's notifications, regular users see only their own
   const { data, isLoading } = useQuery({
     queryKey: ['notifications', { page, type, readFilter, publishFilter, canManage, userId: user?.id }],
     queryFn: async () => {
@@ -99,7 +100,11 @@ export function NotificationPage() {
   };
 
   const createMutation = useMutation({
-    mutationFn: async () => api.post('/notifications', form),
+    mutationFn: async () => {
+      // 🔍 DEBUG: log the exact payload before sending
+      console.log('📤 Sending notification payload:', form);
+      return api.post('/notifications', form);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       resetForm();
@@ -107,7 +112,10 @@ export function NotificationPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async () => api.put(`/notifications/${editingId}`, form),
+    mutationFn: async () => {
+      console.log('📤 Updating notification payload:', form);
+      return api.put(`/notifications/${editingId}`, form);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       resetForm();
@@ -131,7 +139,7 @@ export function NotificationPage() {
 
   const openEdit = (n: NotificationRecord) => {
     setForm({
-      user_id: String(n.user_id),
+      user_id: n.user_id, // already a string
       type: n.type,
       title: n.title,
       message: n.message,
@@ -187,9 +195,15 @@ export function NotificationPage() {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="space-y-1.5">
-                <Label>Message to Recipient user ID</Label>
-                <Input value={form.user_id} onChange={(e) => setForm({ ...form, user_id: e.target.value })} />
+                <Label>Recipient</Label>
+                <EmployeeSearchSelect
+                  value={form.user_id}
+                  onChange={(val) => setForm({ ...form, user_id: val })}
+                  placeholder="Select employee..."
+                  status="active"
+                />
               </div>
+
               <div className="space-y-1.5">
                 <Label>Type</Label>
                 <Input placeholder="e.g. system, leave, payroll" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} />
@@ -282,7 +296,9 @@ export function NotificationPage() {
                   <tr key={n.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                     <td className="px-4 py-3 font-medium">{n.title}</td>
                     <td className="px-4 py-3">{n.type}</td>
-                    <td className="px-4 py-3">{n.user ? n.user.name : n.user_id}</td>
+                    <td className="px-4 py-3">
+                      {n.user ? n.user.name : n.user_id}
+                    </td>
                     <td className="px-4 py-3"><Badge variant={PUBLISH_VARIANT[n.publishStatus]}>{n.publishStatus}</Badge></td>
                     <td className="px-4 py-3">
                       <Badge variant={n.is_read ? 'success' : 'secondary'}>{n.is_read ? 'Read' : 'Unread'}</Badge>

@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { api } from '@/lib/api';
 import { StatCard } from '@/components/dashboard/StatCard';
+import { ShiftBadge } from '@/components/dashboard/ShiftBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -52,7 +53,10 @@ export function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Dashboard" description="A snapshot of your hospital's workforce, today." />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <PageHeader title="Dashboard" description="A snapshot of your hospital's workforce, today." />
+        <ShiftBadge />
+      </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {cardsQuery.isLoading || !c ? (

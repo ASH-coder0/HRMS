@@ -1,12 +1,9 @@
+// src/services/employeeServices.js
 const { Op } = require('sequelize');
 const Employee = require('../../models/Employee');
 const Department = require('../../models/Department');
 const Designation = require('../../models/Designation');
 const Role = require('../../models/Role');
-const EmergencyContact = require('../../models/EmergencyContact');
-const Document = require('../../models/Document');
-const EmployeeEducation = require('../../models/EmployeeEducation');
-const EmployeeExperience = require('../../models/EmployeeExperience');
 const CustomErrorHandler = require('../utils/CustomErrorHandler');
 
 const getAll = async ({ page = 1, limit = 10, search = '', department_id, status }) => {
@@ -28,7 +25,11 @@ const getAll = async ({ page = 1, limit = 10, search = '', department_id, status
 
   const result = await Employee.findAndCountAll({
     where,
-    include: [{ model: Department }, { model: Designation }, { model: Role }],
+    include: [
+      { model: Department }, 
+      { model: Designation }, 
+      { model: Role }
+    ],
     limit: pageSize,
     offset,
     order: [['createdAt', 'DESC']],
@@ -47,11 +48,7 @@ const getById = async (id) => {
     include: [
       { model: Department },
       { model: Designation },
-      { model: Role },
-      { model: EmergencyContact, as: 'emergencyContacts' },
-      { model: Document, as: 'documents' },
-      { model: EmployeeEducation, as: 'education' },
-      { model: EmployeeExperience, as: 'experience' },
+      { model: Role }
     ],
   });
   if (!employee) throw CustomErrorHandler.notFound('Employee not found');
@@ -85,7 +82,10 @@ const uploadPhoto = async (id, fileUrl) => {
   return employee;
 };
 
+// ✅ Keep these functions but they'll work with the models when created
 const uploadDocument = async (id, file, body) => {
+  // This will work once Document model is created
+  const Document = require('../../models/Document');
   return Document.create({
     employee_id: id,
     doc_type: body.doc_type || 'other',
@@ -98,14 +98,17 @@ const uploadDocument = async (id, file, body) => {
 };
 
 const addEmergencyContact = async (id, payload) => {
+  const EmergencyContact = require('../../models/EmergencyContact');
   return EmergencyContact.create({ ...payload, employee_id: id });
 };
 
 const addEducation = async (id, payload) => {
+  const EmployeeEducation = require('../../models/EmployeeEducation');
   return EmployeeEducation.create({ ...payload, employee_id: id });
 };
 
 const addExperience = async (id, payload) => {
+  const EmployeeExperience = require('../../models/EmployeeExperience');
   return EmployeeExperience.create({ ...payload, employee_id: id });
 };
 

@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { router } from '@/routes/router';
@@ -16,6 +18,7 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <RouterProvider router={router} />
+          <ToastContainer position="top-right" autoClose={3000} closeOnClick pauseOnHover/>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

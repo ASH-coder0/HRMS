@@ -16,6 +16,13 @@ import { LeavePage } from '@/pages/leave/LeavePage';
 import {NotificationPage} from '@/pages/notifications/NotificationPage'
 import { ComingSoonPage } from '@/pages/ComingSoonPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import Shifts from '@/pages/shifts/shifts';
+import Profile from '@/pages/Profile';
+import Payroll from '@/pages/payroll/Payroll'
+import SaveSalary from '@/pages/payroll/SaveSalary'
+import Recruitment from '@/pages/recruitment/Recruitment'
+import Traning from '@/pages/traning/Traning'
+import MyNotificationPage from '@/pages/notifications/MyNotificationPage';
 
 const MANAGE_ROLES = ['super_admin', 'hr_manager', 'hospital_admin'] as const;
 
@@ -39,16 +46,18 @@ export const router = createBrowserRouter([
 
           { path: '/attendance', element: <AttendancePage /> },
           { path: '/leave', element: <LeavePage /> },
-          { path: '/shifts', element: <ComingSoonPage title="Shift Management" /> },
-          { path: '/payroll', element: <ComingSoonPage title="Payroll" /> },
-          { path: '/recruitment', element: <ComingSoonPage title="Recruitment" /> },
+          { path: '/shifts', element: <Shifts /> },
+          { path: '/payroll', element: <Payroll /> },
+          { path: '/save-salary', element: <SaveSalary/> },
+          { path: '/recruitment', element: <Recruitment /> },
           { path: '/performance', element: <ComingSoonPage title="Performance Management" /> },
-          { path: '/training', element: <ComingSoonPage title="Training" /> },
+          { path: '/training', element: <Traning /> },
           { path: '/assets', element: <ComingSoonPage title="Asset Management" /> },
           { path: '/notifications', element: <NotificationPage/> },
           { path: '/reports', element: <ComingSoonPage title="Reports" /> },
           { path: '/settings', element: <ComingSoonPage title="Settings" /> },
-          { path: '/profile', element: <ComingSoonPage title="My Profile" /> },
+          { path: '/profile', element: <Profile /> },
+          { path: 'my-notification', element: <MyNotificationPage /> },
 
           {
             element: <ProtectedRoute allowedRoles={[...MANAGE_ROLES]} />,
