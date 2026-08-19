@@ -24,6 +24,10 @@ const Employee = sequelize.define('Employee', {
   profile_photo_url: { type: DataTypes.STRING(255) },
   medical_license_no: { type: DataTypes.STRING(100) },
   medical_license_expiry: { type: DataTypes.DATEONLY },
+  citizenship_number: {
+  type: DataTypes.STRING(50),
+  allowNull: true,
+},
 }, {
   tableName: 'employees',
   timestamps: true,

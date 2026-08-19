@@ -12,6 +12,8 @@ const shiftServices = require("./shiftServices");
 const salaryServices = require("./salaryService");
 const recurimentServices = require("./recurimentServices");
 const trainingServices = require("./traininngServices");
+const economicYearServices = require('./economicYearServices');
+
 module.exports = {
   jwtServices,
   emailServices,

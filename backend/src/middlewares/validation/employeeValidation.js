@@ -8,6 +8,7 @@ const validateCreateEmployee = (req, res, next) => {
     last_name: Joi.string().required(),
     email: Joi.string().email().required(),
     phone: Joi.string().optional().allow(null, ''),
+    citizenship_number: Joi.string().optional().allow(null, ''),
     gender: Joi.string().valid('male', 'female', 'other').optional().allow(null, ''),
     date_of_birth: Joi.date().optional().allow(null, ''),
     date_of_joining: Joi.date().required(),
@@ -31,6 +32,7 @@ const validateUpdateEmployee = (req, res, next) => {
     last_name: Joi.string().optional(),
     email: Joi.string().email().optional(),
     phone: Joi.string().optional().allow(null, ''),
+    citizenship_number: Joi.string().optional().allow(null, ''),
     gender: Joi.string().valid('male', 'female', 'other').optional().allow(null, ''),
     date_of_birth: Joi.date().optional().allow(null, ''),
     date_of_joining: Joi.date().optional(),
@@ -39,7 +41,7 @@ const validateUpdateEmployee = (req, res, next) => {
     role_id: Joi.number().integer().optional(),
     employment_type: Joi.string().valid(...EMPLOYMENT_TYPE).optional(),
     status: Joi.string().valid(...EMPLOYEE_STATUS).optional(),
-    address: Joi.string().optional().allow(null, ''),
+     address: Joi.string().optional().allow(null, ''),
     blood_group: Joi.string().optional().allow(null, ''),
   });
   const { error } = schema.validate(req.body);

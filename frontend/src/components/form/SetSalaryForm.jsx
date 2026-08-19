@@ -6,14 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 
 const initialForm = {
   basic_salary: "",
+  basic_salary_multiplier: "1",
   housing_allowance: "0",
   transport_allowance: "0",
   medical_allowance: "0",
   other_allowance: "0",
+  food_enabled: "no",
+  food_allowance: "0",
+  accommodation_enabled: "no",
+  accommodation_allowance: "0",
+  daily_working_hours: "8",
+  working_days: "26",
+  ot_enabled: "no",
+  ot_rate: "1.5",
   effective_date: new Date().toISOString().slice(0, 10),
 };
 
@@ -37,10 +47,22 @@ export function SetSalaryForm({ onSaved }) {
       return api.post("/salary", {
         employee_id: selectedEmployee.id,
         basic_salary: Number(form.basic_salary),
+        basic_salary_multiplier: Number(form.basic_salary_multiplier || 1),
         housing_allowance: Number(form.housing_allowance || 0),
         transport_allowance: Number(form.transport_allowance || 0),
         medical_allowance: Number(form.medical_allowance || 0),
         other_allowance: Number(form.other_allowance || 0),
+        food_enabled: form.food_enabled === "yes",
+        food_allowance: Number(form.food_allowance || 0),
+        accommodation_enabled: form.accommodation_enabled === "yes",
+        accommodation_allowance: Number(form.accommodation_allowance || 0),
+        daily_working_hours: Number(form.daily_working_hours || 8),
+        // NOTE: working_days is intentionally NOT sent — it's a preview-only
+        // input here. Salary.js has no working_days column; the real figure
+        // for a given month comes from Calendar Setup/Attendance at payroll
+        // run time, not from what's typed in at salary-setup time.
+        ot_enabled: form.ot_enabled === "yes",
+        ot_rate: Number(form.ot_rate || 1.5),
         effective_date: form.effective_date,
       });
     },
@@ -102,6 +124,25 @@ export function SetSalaryForm({ onSaved }) {
 
     mutation.mutate();
   };
+
+  // -- Monthly salary preview (display only, nothing here is submitted) --
+  const monthlyWorkingHours =
+    (Number(form.working_days) || 0) * (Number(form.daily_working_hours) || 0);
+
+  const adjustedBasicSalary =
+    (Number(form.basic_salary) || 0) * (Number(form.basic_salary_multiplier) || 1);
+
+  const hourlyRate = monthlyWorkingHours > 0 ? adjustedBasicSalary / monthlyWorkingHours : 0;
+
+  const estimatedMonthlySalary =
+    adjustedBasicSalary +
+    (form.food_enabled === "yes" ? Number(form.food_allowance) || 0 : 0) +
+    (form.accommodation_enabled === "yes" ? Number(form.accommodation_allowance) || 0 : 0) +
+    Number(form.housing_allowance || 0) +
+    Number(form.transport_allowance || 0) +
+    Number(form.medical_allowance || 0) +
+    Number(form.other_allowance || 0);
+
   console.log("employeeCode:", employeeCode);
   console.log("selectedEmployee:", selectedEmployee);
   return (
@@ -156,6 +197,129 @@ export function SetSalaryForm({ onSaved }) {
             )}
           </div>
 
+          <div className="space-y-1.5">
+            <Label htmlFor="basic_salary_multiplier">Basic salary (times)</Label>
+
+            <Input
+              id="basic_salary_multiplier"
+              type="number"
+              min="0"
+              step="0.1"
+              value={form.basic_salary_multiplier}
+              onChange={handleChange("basic_salary_multiplier")}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="daily_working_hours">Daily working hours</Label>
+
+              <Input
+                id="daily_working_hours"
+                type="number"
+                min="1"
+                max="24"
+                step="0.5"
+                value={form.daily_working_hours}
+                onChange={handleChange("daily_working_hours")}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="working_days">No. of working days (this month)</Label>
+
+              <Input
+                id="working_days"
+                type="number"
+                min="1"
+                max="31"
+                value={form.working_days}
+                onChange={handleChange("working_days")}
+              />
+              <p className="text-xs text-muted-foreground">Used only for the preview below — not saved.</p>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="ot_enabled">OT applicable</Label>
+
+            <Select id="ot_enabled" value={form.ot_enabled} onChange={handleChange("ot_enabled")}>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </Select>
+          </div>
+
+          {form.ot_enabled === "yes" && (
+            <div className="space-y-1.5">
+              <Label htmlFor="ot_rate">OT rate (× hourly rate)</Label>
+
+              <Input
+                id="ot_rate"
+                type="number"
+                min="0"
+                step="0.1"
+                value={form.ot_rate}
+                onChange={handleChange("ot_rate")}
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="food_enabled">Food facility</Label>
+
+              <Select id="food_enabled" value={form.food_enabled} onChange={handleChange("food_enabled")}>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </Select>
+            </div>
+
+            {form.food_enabled === "yes" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="food_allowance">Food allowance</Label>
+
+                <Input
+                  id="food_allowance"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.food_allowance}
+                  onChange={handleChange("food_allowance")}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="accommodation_enabled">Accommodation facility</Label>
+
+              <Select
+                id="accommodation_enabled"
+                value={form.accommodation_enabled}
+                onChange={handleChange("accommodation_enabled")}
+              >
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </Select>
+            </div>
+
+            {form.accommodation_enabled === "yes" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="accommodation_allowance">Accommodation allowance</Label>
+
+                <Input
+                  id="accommodation_allowance"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.accommodation_allowance}
+                  onChange={handleChange("accommodation_allowance")}
+                />
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             {ALLOWANCE_FIELDS.map(({ key, label }) => (
               <div key={key} className="space-y-1.5">
@@ -196,6 +360,36 @@ export function SetSalaryForm({ onSaved }) {
             <p className="text-xs text-muted-foreground">
               History is kept — the row with the latest effective date becomes
               the employee's current salary.
+            </p>
+          </div>
+
+          {/* ============ MONTHLY SALARY PREVIEW ============ */}
+          <div className="rounded-lg border bg-muted/40 p-4">
+            <p className="text-sm font-medium">Monthly salary preview</p>
+
+            <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Monthly hours</p>
+                <p className="text-lg font-semibold">{monthlyWorkingHours.toFixed(1)}</p>
+                <p className="text-xs text-muted-foreground">Days × Daily hours</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Hourly rate</p>
+                <p className="text-lg font-semibold">Rs. {hourlyRate.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Adjusted basic</p>
+                <p className="text-lg font-semibold">Rs. {adjustedBasicSalary.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Est. monthly salary</p>
+                <p className="text-lg font-semibold">Rs. {estimatedMonthlySalary.toFixed(2)}</p>
+              </div>
+            </div>
+
+            <p className="mt-3 text-xs text-muted-foreground">
+              Preview only, nothing here is saved. Excludes OT pay, which depends on actual
+              hours worked and is calculated by the Payroll Calculation module.
             </p>
           </div>
 
