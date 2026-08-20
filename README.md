@@ -91,3 +91,6 @@ employee_education, employee_experience, emergency_contacts, notifications, audi
 - File uploads are stored locally under `backend/uploads` — swap for S3/Cloud Storage before production.
 - Nodemailer will just log emails to the console until you set real SMTP credentials in `.env`.
 - Before deploying: change `JWT_ACCESS_SECRET`/`JWT_REFRESH_SECRET`, set `NODE_ENV=production`, and put the app behind HTTPS.
+
+## economic-year ✔
+## payroll 
