@@ -5,6 +5,7 @@ import {
   WalletCardsIcon,
   UserPlus,
   GraduationCap,
+  Calendar,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -21,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
   { label: 'Employees', to: '/employees', icon: Users },
   { label: 'Departments', to: '/departments', icon: Building2, roles: ['super_admin', 'hr_manager', 'hospital_admin'] },
+    { label: 'Economic year', to: '/economic-year', icon: Calendar, roles: ['super_admin', 'hr_manager', 'hospital_admin'] },
   { label: 'Designations', to: '/designations', icon: Briefcase, roles: ['super_admin', 'hr_manager', 'hospital_admin'] },
   { label: 'Attendance', to: '/attendance', icon: CalendarCheck },
   { label: 'Shifts', to: '/shifts', icon: Clock, roles: ['super_admin', 'hr_manager', 'hospital_admin', 'department_head'] },
