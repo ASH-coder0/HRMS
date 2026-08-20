@@ -1,60 +1,63 @@
-const { DataTypes } = require('sequelize');
+// models/EconomicYear.js
 
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const CalendarSetup = sequelize.define(
-  'CalendarSetup',
+const EconomicYear = sequelize.define(
+  'EconomicYear',
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    nepali_year: {
+
+    user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      comment: 'Nepali Bikram Sambat year, e.g. 2083',
+      unique: true,
     },
 
-    month: {
-      type: DataTypes.INTEGER,
+    economic_year: {
+      type: DataTypes.STRING(50),
       allowNull: false,
-      comment: 'Nepali month number: 1 to 12',
-      validate: {
-        min: 1,
-        max: 12,
-      },
+      //unique: true,
+      comment: 'Economic year, e.g. 2083/2084',
     },
 
-    month_name: {
-      type: DataTypes.STRING(20),
+    start_date: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
-      comment: 'Nepali month name',
     },
 
-    working_days: {
-      type: DataTypes.INTEGER,
+    end_date: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
-      defaultValue: 0,
-      comment: 'Number of working days in the month',
-      validate: {
-        min: 0,
-        max: 32,
-      },
+    },
+
+    status: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
   },
   {
-    tableName: 'calendar_setups',
+    tableName: 'economic_years',
     timestamps: true,
 
     indexes: [
       {
         unique: true,
-        fields: ['nepali_year', 'month'],
-        name: 'unique_nepali_year_month',
+        fields: ['user_id'],
+        name: 'unique_user_economic_year',
+      },
+      {
+        //unique: true,
+        fields: ['economic_year'],
+        name: 'unique_economic_year',
       },
     ],
   }
 );
 
-module.exports = CalendarSetup;
+module.exports = EconomicYear;

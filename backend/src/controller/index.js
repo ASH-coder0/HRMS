@@ -22,5 +22,6 @@ module.exports = {
   shiftController,
   salaryController,
   recurimentController,
-  trainingController
+  trainingController,
+  economicYearController
 };

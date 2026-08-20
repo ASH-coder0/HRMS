@@ -119,7 +119,7 @@ const login = async (email, password) => {
     where: { email }, 
     include: [
       { model: Role },
-      { model: Employee } // ✅ Include Employee model
+      { model: Employee } // Include Employee model
     ] 
   });
   
