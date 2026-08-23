@@ -50,6 +50,11 @@ module.exports = {
         type: Sequelize.STRING(255),
         allowNull: true,
       },
+      total_hour:{
+        type:Sequelize.DOUBLE,
+        allowNull:true,
+        defaultValue:0,
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

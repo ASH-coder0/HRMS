@@ -3,7 +3,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.changeColumn('notifications', 'user_id', {
-      type: Sequelize.STRING(255),
+      type: Sequelize.INTEGER(255),
       allowNull: false,
     });
   },

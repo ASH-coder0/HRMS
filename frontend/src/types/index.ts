@@ -64,6 +64,8 @@ export interface AttendanceRecord {
   late_minutes: number;
   remarks?: string;
   Employee?: Employee;
+  /** Duration between check-in and check-out, in decimal hours. */
+  total_hour?: number;
 }
 
 export interface LeaveType {

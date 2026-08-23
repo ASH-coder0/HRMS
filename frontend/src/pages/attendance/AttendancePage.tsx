@@ -27,13 +27,30 @@ const STATUS_VARIANT: Record<string, 'success' | 'destructive' | 'warning' | 'se
 
 const MANAGE_ROLES = ['super_admin', 'hr_manager', 'hospital_admin', 'department_head'];
 
+function formatTotalHours(hours?: number | null) {
+  if (hours == null) return '—';
+
+  const totalMinutes = Math.round(hours * 60);
+  const wholeHours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${wholeHours}h ${String(minutes).padStart(2, '0')}m`;
+}
+
 export function AttendancePage() {
   const { hasRole } = useAuth();
+  const canViewTotalHours = hasRole('super_admin');
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('');
   const [showManual, setShowManual] = useState(false);
-  const [manualForm, setManualForm] = useState({ employee_id: '', date: '', status: 'present', remarks: '' });
+  const [manualForm, setManualForm] = useState({
+    employee_id: '',
+    date: '',
+    status: 'present',
+    check_in: '',
+    check_out: '',
+    remarks: '',
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ['attendance', { page, status }],
@@ -93,7 +110,7 @@ export function AttendancePage() {
               <p className="font-semibold">Manual attendance entry</p>
               <button onClick={() => setShowManual(false)}><X className="h-4 w-4 text-muted-foreground" /></button>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="space-y-1.5">
                 <Label>Employee ID</Label>
                 <Input value={manualForm.employee_id} onChange={(e) => setManualForm({ ...manualForm, employee_id: e.target.value })} />
@@ -112,6 +129,14 @@ export function AttendancePage() {
                   <option value="on_leave">On leave</option>
                   <option value="holiday">Holiday</option>
                 </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Check in</Label>
+                <Input type="datetime-local" value={manualForm.check_in} onChange={(e) => setManualForm({ ...manualForm, check_in: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Check out</Label>
+                <Input type="datetime-local" value={manualForm.check_out} onChange={(e) => setManualForm({ ...manualForm, check_out: e.target.value })} />
               </div>
               <div className="space-y-1.5">
                 <Label>Remarks</Label>
@@ -153,6 +178,7 @@ export function AttendancePage() {
                   <th className="px-4 py-3 font-medium">Check in</th>
                   <th className="px-4 py-3 font-medium">Check out</th>
                   <th className="px-4 py-3 font-medium">Status</th>
+                  {canViewTotalHours && <th className="px-4 py-3 font-medium">Total hours</th>}
                 </tr>
               </thead>
               <tbody>
@@ -163,6 +189,7 @@ export function AttendancePage() {
                     <td className="px-4 py-3">{rec.check_in ? new Date(rec.check_in).toLocaleTimeString() : '—'}</td>
                     <td className="px-4 py-3">{rec.check_out ? new Date(rec.check_out).toLocaleTimeString() : '—'}</td>
                     <td className="px-4 py-3"><Badge variant={STATUS_VARIANT[rec.status]}>{rec.status.replace('_', ' ')}</Badge></td>
+                    {canViewTotalHours && <td className="px-4 py-3">{formatTotalHours(rec.total_hour)}</td>}
                   </tr>
                 ))}
               </tbody>

@@ -30,30 +30,67 @@ const checkIn = async (employeeId) => {
 
 const checkOut = async (employeeId) => {
   const date = getTodayDateOnly();
-  const record = await Attendance.findOne({ where: { employee_id: employeeId, date } });
-  if (!record || !record.check_in) throw CustomErrorHandler.validationError('You must check in before checking out');
-  if (record.check_out) throw CustomErrorHandler.validationError('Already checked out today');
+
+  const record = await Attendance.findOne({
+    where: {
+      employee_id: employeeId,
+      date,
+    },
+  });
+
+  if (!record || !record.check_in) {
+    throw CustomErrorHandler.validationError(
+      'You must check in before checking out'
+    );
+  }
+
+  if (record.check_out) {
+    throw CustomErrorHandler.validationError(
+      'Already checked out today'
+    );
+  }
 
   record.check_out = new Date();
-  const hoursWorked = (record.check_out - new Date(record.check_in)) / (1000 * 60 * 60);
-  if (hoursWorked > 8) record.overtime_minutes = Math.round((hoursWorked - 8) * 60);
+
+  // Calculate total worked hours
+  const hoursWorked =
+    (record.check_out - new Date(record.check_in)) /
+    (1000 * 60 * 60);
+
+  // Save total hours
+  record.total_hour = Number(hoursWorked.toFixed(2));
+
+  // Calculate overtime
+  if (hoursWorked > 8) {
+    record.overtime_minutes = Math.round(
+      (hoursWorked - 8) * 60
+    );
+  } else {
+    record.overtime_minutes = 0;
+  }
+
   await record.save();
+
   return record;
 };
 
 const manualEntry = async (payload) => {
   const { employee_id, date, status, check_in, check_out, remarks } = payload;
+  const total_hour = check_in && check_out
+    ? Number(((new Date(check_out) - new Date(check_in)) / (1000 * 60 * 60)).toFixed(2))
+    : 0;
+
   const [record, created] = await Attendance.findOrCreate({
     where: { employee_id, date },
-    defaults: { status, check_in, check_out, remarks, is_manual_entry: true },
+    defaults: { status, check_in, check_out, total_hour, remarks, is_manual_entry: true },
   });
   if (!created) {
-    await record.update({ status, check_in, check_out, remarks, is_manual_entry: true });
+    await record.update({ status, check_in, check_out, total_hour, remarks, is_manual_entry: true });
   }
   return record;
 };
 
-const getAll = async ({ employee_id, department_id, start_date, end_date, status, page = 1, limit = 31 }) => {
+const getAll = async ({ employee_id, department_id, start_date, end_date, status, page = 1, limit = 31 }, role) => {
   const pageNumber = parseInt(page, 10) || 1;
   const pageSize = parseInt(limit, 10) || 31;
 
@@ -72,8 +109,16 @@ const getAll = async ({ employee_id, department_id, start_date, end_date, status
     order: [['date', 'DESC']],
   });
 
+  const items = role === 'super_admin'
+    ? result.rows
+    : result.rows.map((record) => {
+      const attendance = record.toJSON();
+      delete attendance.total_hour;
+      return attendance;
+    });
+
   return {
-    items: result.rows,
+    items,
     total: result.count,
     page: pageNumber,
     totalPages: Math.ceil(result.count / pageSize),
