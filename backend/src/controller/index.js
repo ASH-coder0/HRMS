@@ -10,6 +10,8 @@ const  salaryController = require('./salaryController');
 const recurimentController = require('./recurimentController')
 const trainingController = require("./trainingController");
 const economicYearController = require('./economicYearController');
+const payrollController = require('./payrollController')
+const payRollEmployeeDetailController = require('./payRollEmployeeDetailController')
 
 module.exports = {
   authController,
@@ -23,5 +25,7 @@ module.exports = {
   salaryController,
   recurimentController,
   trainingController,
-  economicYearController
+  economicYearController,
+  payrollController,
+  payRollEmployeeDetailController
 };

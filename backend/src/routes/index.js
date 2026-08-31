@@ -11,6 +11,8 @@ const salaryRoutes = require('./salaryRoutes');
 const recurimentRoutes = require('./recurimentRoutes')
 const trainingRoutes = require('./trainingRoutes');
 const economicYearRoutes = require('./economicYearRoutes');
+const payrollRoutes = require('./payRollRoutes')
+const payrollEmployeeDetailRoutes = require('./payrollEmployeeDetailRoutes')
 
 module.exports = {
   authRoutes,
@@ -25,5 +27,7 @@ module.exports = {
   salaryRoutes,
   recurimentRoutes,
   trainingRoutes,
-  economicYearRoutes
+  economicYearRoutes,
+  payrollRoutes,
+  payrollEmployeeDetailRoutes
 };

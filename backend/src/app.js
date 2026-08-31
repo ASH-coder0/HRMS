@@ -30,6 +30,8 @@ const {
   recurimentRoutes,
   trainingRoutes,
   economicYearRoutes,
+  payrollRoutes,
+  payrollEmployeeDetailRoutes,
 } = require('./routes');
 
 // CORS Options
@@ -91,7 +93,9 @@ app.use('/api/shifts', shiftRoutes);
 app.use('/api/salary', salaryRoutes);
 app.use('/api/recruitment', recurimentRoutes);
 app.use('/api/training', trainingRoutes);
-app.use('/api/year', economicYearRoutes)
+app.use('/api/year', economicYearRoutes);
+app.use('/api/payroll', payrollRoutes);
+app.use('/api/emplyee-payroll', payrollEmployeeDetailRoutes)
 
 // Error handling
 app.use(errorHandler);

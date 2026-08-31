@@ -20,6 +20,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
 import Shifts from '@/pages/shifts/shifts';
 import Profile from '@/pages/Profile';
 import Payroll from '@/pages/payroll/Payroll';
+import PayrollDetails from '@/pages/payroll/PayrollDetails';
 import SaveSalary from '@/pages/payroll/SaveSalary';
 import Recruitment from '@/pages/recruitment/Recruitment';
 import Traning from '@/pages/traning/Traning';
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
               { path: '/leave', element: <LeavePage /> },
               { path: '/shifts', element: <Shifts /> },
               { path: '/payroll', element: <Payroll /> },
+              { path: '/payroll-details', element: <PayrollDetails /> },
               { path: '/save-salary', element: <SaveSalary/> },
               { path: '/recruitment', element: <Recruitment /> },
               { path: '/economic-year', element: <EconomicYear/> },

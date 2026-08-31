@@ -28,7 +28,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Shifts', to: '/shifts', icon: Clock, roles: ['super_admin', 'hr_manager', 'hospital_admin', 'department_head'] },
   { label: 'Leave', to: '/leave', icon: Palmtree },
   { label: 'Payroll', to: '/payroll', icon: Wallet, roles: ['super_admin', 'hr_manager', 'accountant'] },
+     { label: 'Payroll Details', to: '/payroll-details', icon: Wallet, roles: ['super_admin', 'hr_manager', 'accountant'] },
     { label: 'Salary Entry', to: '/save-salary', icon: WalletCardsIcon, roles: ['super_admin', 'hr_manager', 'accountant'] },
+    
+  
    { label: 'Recruitment', to: '/recruitment', icon: UserPlus, roles: ['super_admin', 'hr_manager', 'hospital_admin'] },
   // { label: 'Performance', to: '/performance', icon: Award, roles: ['super_admin', 'hr_manager', 'department_head', 'hospital_admin'] },
  { label: 'Training', to: '/training', icon: GraduationCap },

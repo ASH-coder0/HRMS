@@ -13,6 +13,8 @@ const salaryServices = require("./salaryService");
 const recurimentServices = require("./recurimentServices");
 const trainingServices = require("./traininngServices");
 const economicYearServices = require('./economicYearServices');
+const payRoleService = require('./payRoleService')
+const payRoleEmployeeDetailService = require('./payRollEmployeeDetailServices')
 
 module.exports = {
   jwtServices,
@@ -29,4 +31,7 @@ module.exports = {
   salaryServices,
   recurimentServices,
   trainingServices,
+  economicYearServices,
+  payRoleService,
+  payRoleEmployeeDetailService
 };
