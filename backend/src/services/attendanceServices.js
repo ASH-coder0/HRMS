@@ -125,11 +125,27 @@ const getAll = async ({ employee_id, department_id, start_date, end_date, status
   };
 };
 
-const monthlyReport = async ({ employee_id, month, year }) => {
-  if (!month || !year) throw CustomErrorHandler.validationError('month and year are required');
+const monthlyReport = async ({ employee_id, month, year, start_date, end_date }) => {
+  let start;
+  let end;
 
-  const start = `${year}-${String(month).padStart(2, '0')}-01`;
-  const end = `${year}-${String(month).padStart(2, '0')}-31`;
+  if (start_date && end_date) {
+    // Explicit AD range (e.g. converted from a Bikram Sambat month by the caller).
+    start = start_date;
+    end = end_date;
+  } else {
+    if (!month || !year) throw CustomErrorHandler.validationError('month and year are required');
+
+    const monthNum = Number(month);
+    const yearNum = Number(year);
+    if (monthNum < 1 || monthNum > 12) throw CustomErrorHandler.validationError('month must be between 1 and 12');
+
+    const lastDay = new Date(Date.UTC(yearNum, monthNum, 0)).getUTCDate();
+    const monthPart = String(monthNum).padStart(2, '0');
+    start = `${yearNum}-${monthPart}-01`;
+    end = `${yearNum}-${monthPart}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   const where = { date: { [Op.between]: [start, end] } };
   if (employee_id) where.employee_id = employee_id;
 

@@ -72,3 +72,24 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Print only the payroll slip area */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #payslip-print-area,
+  #payslip-print-area * {
+    visibility: visible;
+  }
+
+  #payslip-print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+}
