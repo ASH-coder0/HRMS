@@ -64,31 +64,34 @@ function formatDate(value?: string) {
 }
 
 const MyNotificationPage = () => {
-  const { user } = useAuth();
-  const employeeCode = user?.employeeCode;
+const { user } = useAuth();
+
+const userId = user?.id ?? null;
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Notification | null>(null);
 
-  useEffect(() => {
-    if (!employeeCode) return;
+ useEffect(() => {
+  if (!userId) return;
 
-    const findNotification = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get(`/notifications/user/${employeeCode}`);
-        setNotifications(res.data.data || []);
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-        setNotifications([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const findNotification = async () => {
+    try {
+      setLoading(true);
 
-    findNotification();
-  }, [employeeCode]);
+      const res = await api.get(`/notifications/user/${userId}`);
+
+      setNotifications(res.data.data || []);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      setNotifications([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  findNotification();
+}, [userId]);
 
   useEffect(() => {
     if (!selected) return;

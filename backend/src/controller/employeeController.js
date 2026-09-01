@@ -7,21 +7,13 @@ const getAll = asyncHandler(async (req, res) => {
   return res.status(200).json(SUCCESS_API_FETCH(data, 'Employees fetched successfully'));
 });
 
-const getById = async (id) => {
-  const employee = await Employee.findByPk(id, {
-    include: [
-      { model: Department },
-      { model: Designation },
-      { model: Role },
-    ],
-  });
+const getById = asyncHandler(async (req, res) => {
+  const data = await employeeServices.getById(req.params.id);
 
-  if (!employee) {
-    throw CustomErrorHandler.notFound('Employee not found');
-  }
-
-  return employee;
-};
+  return res
+    .status(200)
+    .json(SUCCESS_API_FETCH(data, 'Employee fetched successfully'));
+});
 
 const getMe = asyncHandler(async (req, res) => {
   const employeeId = req.user.employee_id;

@@ -133,6 +133,63 @@ class NotificationService {
 
     return await Notification.bulkCreate(notifications);
   }
+    // Notify employee when leave is approved
+  async leaveApprovedNotification(employee_id, start_date, end_date, total_days) {
+    const user = await User.findOne({
+      where: {
+        employee_id: employee_id,
+      },
+      attributes: ['id'],
+    });
+
+    if (!user) {
+      throw new Error(
+        `User account not found for employee_id=${employee_id}`
+      );
+    }
+
+    return await Notification.create({
+      user_id: user.id,
+      type: 'leave',
+      title: 'Leave Approved',
+      message: `Your leave request from ${start_date} to ${end_date} for ${total_days} day(s) has been approved.`,
+      publishStatus: 'published',
+      author: 'HR',
+      status: 1,
+      publishDate: new Date(),
+      is_read: false,
+      link: '/leave',
+    });
+  }
+
+  // Notify employee when leave is rejected
+  async leaveRejectedNotification(employee_id, start_date, end_date, reason) {
+    const user = await User.findOne({
+      where: {
+        employee_id: employee_id,
+      },
+      attributes: ['id'],
+    });
+
+    if (!user) {
+      throw new Error(
+        `User account not found for employee_id=${employee_id}`
+      );
+    }
+
+    return await Notification.create({
+      user_id: user.id,
+      type: 'leave',
+      title: 'Leave Rejected',
+      message: `Your leave request from ${start_date} to ${end_date} has been rejected.${reason ? ` Reason: ${reason}` : ''}`,
+      publishStatus: 'published',
+      author: 'HR',
+      status: 1,
+      publishDate: new Date(),
+      is_read: false,
+      link: '/leave',
+    });
+  }
 
   // Mark single notification as read
   async markAsRead(id) {
@@ -166,6 +223,7 @@ class NotificationService {
       where: { user_id, is_read: true },
     });
   }
+  
 }
 
 module.exports = new NotificationService();
