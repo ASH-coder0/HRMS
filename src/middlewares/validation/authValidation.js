@@ -8,13 +8,36 @@ const passwordSchema = Joi.string()
     'any.required': 'Password is required',
   });
 
+const validateRegister = (req, res, next) => {
+  const schema = Joi.object({
+    email: Joi.string()
+      .email()
+      .required()
+      .messages({
+        'string.email': 'Please provide a valid email address',
+        'any.required': 'Email is required',
+      }),
+
+    password: passwordSchema,
+  });
+
+  const { error } = schema.validate(req.body);
+
+  if (error) return next(error);
+
+  next();
+};
+
 const validateLogin = (req, res, next) => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),
   });
+
   const { error } = schema.validate(req.body);
+
   if (error) return next(error);
+
   next();
 };
 
@@ -22,8 +45,11 @@ const validateRefreshToken = (req, res, next) => {
   const schema = Joi.object({
     refresh_token: Joi.string().required(),
   });
+
   const { error } = schema.validate(req.body);
+
   if (error) return next(error);
+
   next();
 };
 
@@ -31,8 +57,11 @@ const validateForgotPassword = (req, res, next) => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
   });
+
   const { error } = schema.validate(req.body);
+
   if (error) return next(error);
+
   next();
 };
 
@@ -42,12 +71,16 @@ const validateResetPassword = (req, res, next) => {
     token: Joi.string().required(),
     new_password: passwordSchema,
   });
+
   const { error } = schema.validate(req.body);
+
   if (error) return next(error);
+
   next();
 };
 
 module.exports = {
+  validateRegister,
   validateLogin,
   validateRefreshToken,
   validateForgotPassword,

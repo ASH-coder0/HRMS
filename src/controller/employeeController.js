@@ -9,7 +9,27 @@ const getAll = asyncHandler(async (req, res) => {
 
 const getById = asyncHandler(async (req, res) => {
   const data = await employeeServices.getById(req.params.id);
-  return res.status(200).json(SUCCESS_API_FETCH(data, 'Employee fetched successfully'));
+
+  return res
+    .status(200)
+    .json(SUCCESS_API_FETCH(data, 'Employee fetched successfully'));
+});
+
+const getMe = asyncHandler(async (req, res) => {
+  const employeeId = req.user.employee_id;
+
+  if (!employeeId) {
+    return res.status(400).json({
+      success: false,
+      message: 'No employee is linked to this account',
+    });
+  }
+
+  const data = await employeeServices.getById(employeeId);
+
+  return res
+    .status(200)
+    .json(SUCCESS_API_FETCH(data, 'Profile fetched successfully'));
 });
 
 const create = asyncHandler(async (req, res) => {
@@ -53,6 +73,6 @@ const addExperience = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  getAll, getById, create, update, remove,
+  getAll, getById, getMe, create, update, remove,
   uploadPhoto, uploadDocument, addEmergencyContact, addEducation, addExperience,
 };

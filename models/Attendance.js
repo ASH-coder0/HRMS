@@ -13,6 +13,7 @@ const Attendance = sequelize.define('Attendance', {
   overtime_minutes: { type: DataTypes.INTEGER, defaultValue: 0 },
   late_minutes: { type: DataTypes.INTEGER, defaultValue: 0 },
   remarks: { type: DataTypes.STRING(255) },
+  total_hour :{type:DataTypes.DOUBLE}
 }, {
   tableName: 'attendance',
   timestamps: true,

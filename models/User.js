@@ -32,5 +32,6 @@ User.prototype.comparePassword = function (plain) {
 
 User.belongsTo(Role, { foreignKey: 'role_id' });
 User.belongsTo(Employee, { foreignKey: 'employee_id' });
+Employee.hasOne(User, { foreignKey: 'employee_id', as: 'account' });
 
 module.exports = User;
