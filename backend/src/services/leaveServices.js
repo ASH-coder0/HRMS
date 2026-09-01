@@ -198,9 +198,27 @@ const hrApprove = async (id, approverId) => {
         `hrApprove: failed to send leave approval email for leave_request_id=${id} - ${err.message}`,
       );
     }
-  } else {
+    } else {
     logger.warn(
       `hrApprove: no email on file for employee_id=${request.employee_id}, skipping leave approval email`,
+    );
+  }
+
+  // Notify employee about leave approval
+  try {
+    await notificationService.leaveApprovedNotification(
+      request.employee_id,
+      request.start_date,
+      request.end_date,
+      request.total_days
+    );
+
+    logger.info(
+      `hrApprove: approval notification created for employee_id=${request.employee_id}`
+    );
+  } catch (err) {
+    logger.error(
+      `hrApprove: failed to create approval notification for employee_id=${request.employee_id} - ${err.message}`
     );
   }
 
@@ -220,6 +238,24 @@ const reject = async (id, reason) => {
   request.rejection_reason = reason || null;
 
   await request.save();
+
+  // Notify employee about leave rejection
+  try {
+    await notificationService.leaveRejectedNotification(
+      request.employee_id,
+      request.start_date,
+      request.end_date,
+      reason
+    );
+
+    logger.info(
+      `reject: rejection notification created for employee_id=${request.employee_id}`
+    );
+  } catch (err) {
+    logger.error(
+      `reject: failed to create rejection notification for employee_id=${request.employee_id} - ${err.message}`
+    );
+  }
 
   return request;
 };
