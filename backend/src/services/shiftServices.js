@@ -1,7 +1,8 @@
 const Shift = require("../../models/Shift");
 const EmployeeShift = require("../../models/EmployeeShift");
 const Employee = require("../../models/Employee");
-
+const User = require("../../models/User");
+const Notification = require("../../models/Notification");
 
 // CREATE SHIFT
 
@@ -291,7 +292,8 @@ const assignShiftService = async ({
       return {
         success: false,
         status: 400,
-        message: "Shift can only be assigned to an active employee",
+        message:
+          "Shift can only be assigned to an active employee",
       };
     }
 
@@ -322,10 +324,12 @@ const assignShiftService = async ({
       return {
         success: false,
         status: 409,
-        message: "This shift is already assigned to this employee",
+        message:
+          "This shift is already assigned to this employee",
       };
     }
 
+    // Create employee shift assignment
     const employeeShift = await EmployeeShift.create({
       employee_id,
       shift_id,
@@ -334,6 +338,7 @@ const assignShiftService = async ({
         day_of_week !== undefined ? day_of_week : null,
     });
 
+    // Get complete assignment information
     const result = await EmployeeShift.findByPk(
       employeeShift.id,
       {
@@ -364,6 +369,66 @@ const assignShiftService = async ({
         ],
       }
     );
+
+    // =====================================================
+    // SEND NOTIFICATION TO EMPLOYEE
+    // =====================================================
+
+    try {
+      // Find the user account linked to this employee
+      const user = await User.findOne({
+        where: {
+          employee_id: employee_id,
+        },
+      });
+
+      if (user) {
+        const dayNames = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
+
+        const dayName =
+          day_of_week !== undefined &&
+          day_of_week !== null
+            ? dayNames[Number(day_of_week)]
+            : "";
+
+        const notificationMessage = dayName
+          ? `Your shift "${shift.name}" has been assigned for ${dayName} starting from ${effective_date}. Working time: ${shift.start_time} - ${shift.end_time}.`
+          : `Your shift "${shift.name}" has been assigned starting from ${effective_date}. Working time: ${shift.start_time} - ${shift.end_time}.`;
+
+        await Notification.create({
+          user_id: user.id,
+          title: "New Shift Assigned",
+          message: notificationMessage,
+          type: "shift",
+        });
+
+        console.log(
+          `Shift notification sent to employee ${employee_id}`
+        );
+      } else {
+        console.log(
+          `No user account found for employee ${employee_id}. Shift assigned but notification was not created.`
+        );
+      }
+    } catch (notificationError) {
+      // Do not fail the shift assignment if notification fails
+      console.error(
+        "SHIFT NOTIFICATION ERROR:",
+        notificationError
+      );
+    }
+
+    // =====================================================
+    // RETURN SUCCESS
+    // =====================================================
 
     return {
       success: true,
@@ -439,11 +504,13 @@ const getEmployeeShiftsService = async (employee_id) => {
     return {
       success: false,
       status: 500,
-      message: "Something went wrong while fetching employee shifts",
+      message:
+        "Something went wrong while fetching employee shifts",
       error: error.message,
     };
   }
 };
+
 
 // GET ALL EMPLOYEE SHIFT ASSIGNMENTS
 
@@ -492,11 +559,13 @@ const getAllEmployeeShiftsService = async () => {
     return {
       success: false,
       status: 500,
-      message: "Something went wrong while fetching shift assignments",
+      message:
+        "Something went wrong while fetching shift assignments",
       error: error.message,
     };
   }
 };
+
 
 // REMOVE EMPLOYEE SHIFT
 
@@ -533,7 +602,8 @@ const removeEmployeeShiftService = async (id) => {
     return {
       success: false,
       status: 500,
-      message: "Something went wrong while removing shift",
+      message:
+        "Something went wrong while removing shift",
       error: error.message,
     };
   }
