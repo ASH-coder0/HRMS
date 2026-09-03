@@ -26,6 +26,7 @@ import Recruitment from '@/pages/recruitment/Recruitment';
 import Traning from '@/pages/traning/Traning';
 import EconomicYear from '@/pages/year/EconomicYear'
 import MyNotificationPage from '@/pages/notifications/MyNotificationPage';
+import MessageSetting from '@/pages/sms/MessageSetting'
 
 const MANAGE_ROLES = ['super_admin', 'hr_manager', 'hospital_admin'];
 
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
               { path: '/leave', element: <LeavePage /> },
               { path: '/shifts', element: <Shifts /> },
               { path: '/payroll', element: <Payroll /> },
+             { path: '/message', element: <MessageSetting /> },
               { path: '/payroll-details', element: <PayrollDetails /> },
               { path: '/save-salary', element: <SaveSalary/> },
               { path: '/recruitment', element: <Recruitment /> },

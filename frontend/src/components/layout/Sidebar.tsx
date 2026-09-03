@@ -6,6 +6,7 @@ import {
   UserPlus,
   GraduationCap,
   Calendar,
+  MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -25,6 +26,7 @@ const NAV_ITEMS: NavItem[] = [
     { label: 'Economic year', to: '/economic-year', icon: Calendar, roles: ['super_admin', 'hr_manager', 'hospital_admin'] },
   { label: 'Designations', to: '/designations', icon: Briefcase, roles: ['super_admin', 'hr_manager', 'hospital_admin'] },
   { label: 'Attendance', to: '/attendance', icon: CalendarCheck },
+  { label: 'Message Setting', to: '/message', icon: MessageCircle, roles: ['super_admin', 'hr_manager', 'hospital_admin'] },
   { label: 'Shifts', to: '/shifts', icon: Clock, roles: ['super_admin', 'hr_manager', 'hospital_admin', 'department_head'] },
   { label: 'Leave', to: '/leave', icon: Palmtree },
   { label: 'Payroll', to: '/payroll', icon: Wallet, roles: ['super_admin', 'hr_manager', 'accountant'] },
