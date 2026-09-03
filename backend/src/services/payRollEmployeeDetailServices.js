@@ -312,3 +312,43 @@ export const getPaidPayrollDetails = async (employeeId, economicYearId, month) =
     };
   }
 };
+
+export const getAllPaidPayrollDetails = async () => {
+  try {
+    const records = await PayrollEmployeeDetails.findAll({
+      where: { status: "paid" },
+      include: [{ model: Employee }],
+      order: [["payment_date", "DESC"]],
+    });
+
+    return { success: true, data: records };
+  } catch (err) {
+    throw {
+      status: err.status || 500,
+      message: err.message || "Failed to fetch paid payroll records",
+    };
+  }
+};
+
+export const searchRecieptNumber = async (receiptNumber) => {
+  try {
+    const record = await PayrollEmployeeDetails.findOne({
+      where: {
+        receipt_number: receiptNumber.trim(),
+        status: "paid",
+      },
+      include: [{ model: Employee }],
+    });
+
+    if (!record) {
+      throw { status: 404, message: "No paid payroll found for this receipt number" };
+    }
+
+    return { success: true, data: record };
+  } catch (err) {
+    throw {
+      status: err.status || 500,
+      message: err.message || "Failed to search receipt number",
+    };
+  }
+};

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ const PayrollDetails = ({
   onPaymentSaved,
 }) => {
   const { user } = useAuth();
+  const [paymentMethod, setPaymentMethod] = useState("cash");
 
   if (!payroll || !payroll.salary) return null;
 
@@ -64,6 +65,9 @@ const PayrollDetails = ({
   
 
 const payEmployee = async () => {
+  const employeeName = `${employee?.first_name || ""} ${employee?.last_name || ""}`.trim();
+  if (!window.confirm(`Are you sure you want to pay "${employeeName}"?`)) return;
+
   try {
     const payload = {
       employeeId: employee?.id || employee?.employee_id,
@@ -96,7 +100,7 @@ const payEmployee = async () => {
       salary: payroll?.salary,
       payroll,
 
-      paymentMethod: "cash",
+      paymentMethod,
       paymentReference: null,
       paidById: user?.id,
       remarks: null,
@@ -311,14 +315,28 @@ const payEmployee = async () => {
       </div>
 
       {/* Footer */}
-      <div className="mt-6 flex justify-between text-xs text-muted-foreground print:hidden">
+     <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground print:hidden">
         <span>Generated: {new Date().toLocaleString()}</span>
 
-     
-     <Button onClick={payEmployee}>
-  Pay {employee?.first_name} {employee?.last_name}
-</Button>
-      </div>
+       <div className="flex items-center gap-2">
+         <label htmlFor="payment-method" className="font-medium text-gray-700">
+           Payment method
+         </label>
+         <select
+           id="payment-method"
+           value={paymentMethod}
+           onChange={(event) => setPaymentMethod(event.target.value)}
+           className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+         >
+           <option value="cash">Cash</option>
+           <option value="bank_transfer">Bank Transfer</option>
+           <option value="digital_wallet">Wallet</option>
+         </select>
+         <Button onClick={payEmployee}>
+           Pay {employee?.first_name} {employee?.last_name}
+         </Button>
+       </div>
+     </div>
       <p className="mt-6 hidden justify-between text-xs text-muted-foreground print:flex">
         <span>Employee Signature: ____________________</span>
         <span>Authorized Signature: ____________________</span>

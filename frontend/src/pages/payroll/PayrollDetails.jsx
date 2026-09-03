@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Banknote, Users, Wallet } from "lucide-react";
 import { api } from "@/lib/api";
+import PaidSalary from "../../components/tables/PaidSalary";
 
 
 const PayrollDetails = () => {
@@ -39,34 +41,42 @@ const PayrollDetails = () => {
 
   return (
     <>
-      {/* Total gross vs paid */}
-      <div className="rounded-md border border-gray-300 bg-white p-6 text-sm">
-        <p className="mb-3 text-base font-semibold">Total Payroll Paid</p>
-
-        {loading ? (
-          <p className="text-muted-foreground">Loading...</p>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex justify-between border-b border-gray-200 pb-2">
-              <span>Total Gross Salary Paid</span>
-              <span className="font-bold">{rs(totalGross)}</span>
-            </div>
-
-            <div className="flex justify-between border-b border-gray-200 pb-2">
-              <span>Total Net Salary Paid</span>
-              <span className="font-bold">{rs(totalNet)}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span>Employees Paid</span>
-              <span className="font-bold">{totalEmployeesPaid}</span>
-            </div>
-          </div>
-        )}
+{/* Total gross vs paid */}
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+  {loading ? (
+    <p className="text-muted-foreground col-span-3">Loading...</p>
+  ) : (
+    <>
+      {/* Card 1: Total Gross Salary */}
+      <div className="rounded-md border border-blue-300 bg-white p-6 shadow-sm">
+        <p className="text-sm text-gray-500">Total Gross Salary</p>
+        <div className="mt-2 flex items-center gap-2">
+          <Banknote className="h-5 w-5 text-blue-600" aria-hidden="true" />
+          <p className="text-2xl font-bold">{rs(totalGross)}</p>
+        </div>
       </div>
 
-      {/* Search by receipt number and list all paid details */}
-    
+      {/* Card 2: Total Net Salary Paid */}
+      <div className="rounded-md border border-blue-300 bg-white p-6 shadow-sm">
+        <p className="text-sm text-gray-500">Total Net Salary Paid</p>
+        <div className="mt-2 flex items-center gap-2">
+          <Wallet className="h-5 w-5 text-blue-600" aria-hidden="true" />
+          <p className="text-2xl font-bold">{rs(totalNet)}</p>
+        </div>
+      </div>
+
+      {/* Card 3: Payment Done */}
+      <div className="rounded-md border border-blue-300 bg-white p-6 shadow-sm">
+        <p className="text-sm text-gray-500">Payment Done</p>
+        <div className="mt-2 flex items-center gap-2">
+          <Users className="h-5 w-5 text-blue-600" aria-hidden="true" />
+          <p className="text-2xl font-bold">{totalEmployeesPaid}</p>
+        </div>
+      </div>
+    </>
+  )}
+</div>
+      <PaidSalary />
     </>
   );
 };

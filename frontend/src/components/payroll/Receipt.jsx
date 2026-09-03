@@ -1,4 +1,5 @@
 import React, { forwardRef } from "react";
+import companyDetails from "@/config/company";
 
 const rs = (n) =>
   `Rs. ${Number(n || 0).toLocaleString(undefined, {
@@ -8,10 +9,14 @@ const rs = (n) =>
 
 const amount = (value) => Number(value || 0);
 
+const paymentMethodLabel = (method) =>
+  String(method || "-")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+
 const parseItems = (value) => {
   if (Array.isArray(value)) return value;
   if (!value) return [];
-
   try {
     const parsed = JSON.parse(value);
     return Array.isArray(parsed) ? parsed : [];
@@ -33,7 +38,7 @@ const Receipt = forwardRef(({ payroll, employee }, ref) => {
 
   const additionItems = [
     ...(amount(payroll?.ot_pay) !== 0
-      ? [[`Overtime (${payroll?.overtime_hours || 0} hours)`, payroll.ot_pay]]
+      ? [[`Overtime (${payroll?.overtime_hours || 0} hrs)`, payroll.ot_pay]]
       : []),
     ...parseItems(payroll?.other_additions)
       .filter((item) => amount(item.amount) !== 0)
@@ -48,81 +53,175 @@ const Receipt = forwardRef(({ payroll, employee }, ref) => {
       .filter((item) => amount(item.amount) !== 0)
       .map((item) => [item.label || "Deduction", item.amount]),
   ];
-  const totalAdditions = additionItems.reduce((sum, [, value]) => sum + amount(value), 0);
-  const totalDeductions = deductionItems.reduce((sum, [, value]) => sum + amount(value), 0);
 
-  const renderRows = (items) =>
-    items.map(([label, value]) => (
-      <tr key={label}>
-        <td className="py-1">{label}</td>
-        <td className="py-1 text-right">{rs(value)}</td>
-      </tr>
-    ));
+  const totalAdditions = additionItems.reduce((sum, [, v]) => sum + amount(v), 0);
+  const totalDeductions = deductionItems.reduce((sum, [, v]) => sum + amount(v), 0);
+  const grossSalary = amount(payroll?.gross_pay);
+  const netPay = amount(payroll?.net_pay);
+
+  // Unified line-item list so it renders as one QTY/Description/Amount table,
+  // matching the reference layout. "type" drives the sign shown in Amount.
+  const lineItems = [
+    ...salaryItems.map(([label, value]) => ({ label, value, type: "add" })),
+    ...additionItems.map(([label, value]) => ({ label, value, type: "add" })),
+    ...deductionItems.map(([label, value]) => ({ label, value, type: "sub" })),
+  ];
+
+  const paymentDate = payroll?.payment_date
+    ? new Date(payroll.payment_date).toLocaleDateString()
+    : "-";
 
   return (
-    <div id="payslip-print-area" ref={ref} className="w-[350px] p-6 font-sans">
-      <h2 className="text-center text-lg font-bold mb-1">Salary Receipt</h2>
-      <p className="text-center text-xs text-muted-foreground mb-4">Company Name Pvt. Ltd.</p>
+    <div
+      id="payslip-print-area"
+      ref={ref}
+      className="w-[380px] bg-white text-[#0f172a] font-sans text-xs print:w-full"
+    >
+      <style>{`
+        @media print {
+          @page { size: A5; margin: 10mm; }
+          #payslip-print-area { width: 100% !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+      `}</style>
 
-      <hr className="my-3" />
+      <div className="p-6">
+        {/* Header: FROM block + RECEIPT title */}
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <p className="text-[10px] font-bold text-[#1e3a5f] tracking-wide mb-1">
+              FROM
+            </p>
+            <p className="font-semibold text-[13px]">
+              {companyDetails.name}
+            </p>
+            {companyDetails.address && <p className="text-gray-600">{companyDetails.address}</p>}
+            {companyDetails.phone && <p className="text-gray-600">{companyDetails.phone}</p>}
+            {companyDetails.email && <p className="text-gray-600">{companyDetails.email}</p>}
+            {companyDetails.website && <p className="text-gray-600">{companyDetails.website}</p>}
+          </div>
+          <h1 className="text-2xl font-bold text-[#1e3a5f] tracking-wide">
+            PAYSLIP
+          </h1>
+        </div>
 
-      <div className="text-sm space-y-1 mb-3">
-        <p><span className="font-semibold">Employee:</span> {employee?.first_name} {employee?.last_name}</p>
-        <p><span className="font-semibold">Code:</span> {employee?.employee_code}</p>
-        <p><span className="font-semibold">Period:</span> {payroll?.period_label}</p>
-        <p><span className="font-semibold">Receipt No:</span> {payroll?.receipt_number}</p>
+        {/* TO block + receipt meta */}
+        <div className="flex justify-between items-start mb-5">
+          <div>
+            <p className="text-[10px] font-bold text-[#1e3a5f] tracking-wide mb-1">
+              TO
+            </p>
+            <p className="font-semibold text-[13px]">
+              {employee?.first_name} {employee?.last_name}
+            </p>
+            <p className="text-gray-600">Employee Code: {employee?.employee_code}</p>
+          </div>
+          <div className="text-right">
+            <p>
+              <span className="font-semibold text-[#1e3a5f]">Receipt #:</span>{" "}
+              {payroll?.receipt_number}
+            </p>
+            <p>
+              <span className="font-semibold text-[#1e3a5f]">Pay Period:</span>{" "}
+              {payroll?.period_label}
+            </p>
+            <p>
+              <span className="font-semibold text-[#1e3a5f]">Payment Date:</span>{" "}
+              {paymentDate}
+            </p>
+            <p>
+              <span className="font-semibold text-[#1e3a5f]">Payment Method:</span>{" "}
+              {paymentMethodLabel(payroll?.payment_method)}
+            </p>
+          </div>
+        </div>
+
+        {/* Line items table */}
+        <table className="w-full border-collapse mb-4">
+          <thead>
+            <tr className="bg-[#1e3a5f] text-white">
+              <th className="text-left font-semibold py-1.5 px-2 w-2/3">
+                Description
+              </th>
+              <th className="text-right font-semibold py-1.5 px-2">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lineItems.length === 0 ? (
+              <tr>
+                <td colSpan={2} className="py-2 px-2 text-center text-gray-400">
+                  No line items
+                </td>
+              </tr>
+            ) : (
+              lineItems.map((item, i) => (
+                <tr
+                  key={`${item.label}-${i}`}
+                  className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                >
+                  <td className="py-1 px-2 border-b border-gray-200">
+                    {item.label}
+                  </td>
+                  <td
+                    className={`py-1 px-2 text-right border-b border-gray-200 tabular-nums ${
+                      item.type === "sub" ? "text-red-600" : ""
+                    }`}
+                  >
+                    {item.type === "sub" ? "-" : ""}
+                    {rs(item.value)}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        {/* Summary */}
+        <div className="flex justify-end mb-6">
+          <table className="w-1/2 text-xs">
+            <tbody>
+              <tr>
+                <td className="py-1 px-2 text-gray-600">Gross Salary</td>
+                <td className="py-1 px-2 text-right tabular-nums">
+                  {rs(grossSalary)}
+                </td>
+              </tr>
+              {totalAdditions !== 0 && (
+                <tr>
+                  <td className="py-1 px-2 text-gray-600">Total Additions</td>
+                  <td className="py-1 px-2 text-right tabular-nums">
+                    +{rs(totalAdditions)}
+                  </td>
+                </tr>
+              )}
+              {totalDeductions !== 0 && (
+                <tr>
+                  <td className="py-1 px-2 text-gray-600">Total Deductions</td>
+                  <td className="py-1 px-2 text-right text-red-600 tabular-nums">
+                    -{rs(totalDeductions)}
+                  </td>
+                </tr>
+              )}
+              <tr className="bg-[#1e3a5f] text-white font-bold">
+                <td className="py-1.5 px-2 rounded-l">Net Pay</td>
+                <td className="py-1.5 px-2 text-right tabular-nums rounded-r">
+                  {rs(netPay)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Notes */}
+        <div>
+          <p className="text-[10px] font-bold text-[#1e3a5f] tracking-wide mb-1">
+            NOTES
+          </p>
+          <p className="text-gray-600">
+            This is a computer generated receipt. Thank you for your service!
+          </p>
+        </div>
       </div>
-
-      <hr className="my-3" />
-
-      <table className="w-full text-sm">
-        <tbody>
-          {salaryItems.length > 0 && (
-            <>
-              <tr><td colSpan="2" className="pt-1 font-bold">Salary</td></tr>
-              {renderRows(salaryItems)}
-            </>
-          )}
-          <tr>
-            <td className="py-1 font-semibold">Gross Salary</td>
-            <td className="py-1 text-right font-semibold">{rs(payroll?.gross_pay)}</td>
-          </tr>
-          {additionItems.length > 0 && (
-            <>
-              <tr><td colSpan="2" className="pt-2 font-bold">Additions</td></tr>
-              {renderRows(additionItems)}
-            </>
-          )}
-          {deductionItems.length > 0 && (
-            <>
-              <tr><td colSpan="2" className="pt-2 font-bold">Deductions</td></tr>
-              {renderRows(deductionItems)}
-            </>
-          )}
-          {additionItems.length > 0 && (
-            <tr>
-              <td className="py-1 font-semibold">Total Additions</td>
-              <td className="py-1 text-right font-semibold">{rs(totalAdditions)}</td>
-            </tr>
-          )}
-          {deductionItems.length > 0 && (
-            <tr>
-              <td className="py-1 font-semibold">Total Deductions</td>
-              <td className="py-1 text-right font-semibold">{rs(totalDeductions)}</td>
-            </tr>
-          )}
-          <tr>
-            <td className="py-2 font-bold">Net Pay</td>
-            <td className="py-2 text-right font-bold">{rs(payroll?.net_pay)}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <hr className="my-3" />
-
-      <p className="text-center text-[11px] text-muted-foreground">
-        This is a computer generated receipt.
-      </p>
     </div>
   );
 });
