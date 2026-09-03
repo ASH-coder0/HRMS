@@ -8,5 +8,7 @@ router.post('/status', auth, authorize('admin', 'super_admin', 'accountant'), pa
 
 router.get('/total-paid', auth, authorize('admin', 'super_admin', 'accountant'), payRollEmployeeDetailController.calculatePaidSalaryController);
 router.get('/paid-details', auth, authorize('admin', 'super_admin', 'accountant'), payRollEmployeeDetailController.getPaidPayrollDetailsController);
+router.get('/paid-all', auth, authorize('admin', 'super_admin', 'accountant'), payRollEmployeeDetailController.getAllPaidPayrollDetailsController);
 
+router.get('/search', auth, authorize('admin', 'super_admin', 'accountant'), payRollEmployeeDetailController.searchRecieptNumberController);
 module.exports = router;

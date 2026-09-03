@@ -68,7 +68,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <HeartPulse className="h-5 w-5" />
           </div>
-          {!collapsed && <span className="truncate font-bold tracking-tight">Hospital HRMS</span>}
+          {!collapsed && <span className="truncate font-bold tracking-tight">HRMS</span>}
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">

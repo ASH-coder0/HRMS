@@ -3,7 +3,34 @@ import {
   statusPaid,
   calculatePaidSalary,
   getPaidPayrollDetails,
+  getAllPaidPayrollDetails,
+  searchRecieptNumber,
 } from "../services/payRollEmployeeDetailServices.js";
+
+export const searchRecieptNumberController = async (req, res) => {
+  try {
+    const { receiptNumber } = req.query.receiptNumber ? req.query : req.body;
+
+    if (!receiptNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "Receipt number is required",
+      });
+    }
+
+    const receiptDetails = await searchRecieptNumber(receiptNumber);
+
+    return res.status(200).json({
+      success: true,
+      data: receiptDetails.data,
+    });
+  } catch (err) {
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message || "Failed to search receipt number",
+    });
+  }
+};
 
 export const saveEmployeeDetailController = async (req, res) => {
   try {
@@ -101,6 +128,18 @@ export const getPaidPayrollDetailsController = async (req, res) => {
     return res.status(error.status || 500).json({
       success: false,
       message: error.message || "Failed to fetch paid payroll details",
+    });
+  }
+};
+
+export const getAllPaidPayrollDetailsController = async (req, res) => {
+  try {
+    const result = await getAllPaidPayrollDetails();
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to fetch paid payroll records",
     });
   }
 };
