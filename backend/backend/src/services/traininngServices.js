@@ -1,8 +1,7 @@
 const { Op } = require('sequelize');
 const Training = require('../../models/Training');
 const EmployeeTraining = require('../../models/EmployeeTraining');
-const Employee = require('../../models/Employee');
-const Notification = require('../../models/Notification');
+const Employee = require('../../models/Employee'); 
 
 // ---------- TRAINING CRUD ----------
 
@@ -21,12 +20,7 @@ const getTrainingById = async (id, { withEnrollments = false } = {}) => {
     options.include = [
       {
         model: EmployeeTraining,
-        include: [
-          {
-            model: Employee,
-            attributes: ['id', 'name', 'department_id', 'role'],
-          },
-        ],
+        include: [{ model: Employee, attributes: ['id', 'name', 'department_id', 'role'] }],
       },
     ];
   }
@@ -46,10 +40,7 @@ const deleteTraining = async (id) => {
   const training = await Training.findByPk(id);
   if (!training) return null;
 
-  await EmployeeTraining.destroy({
-    where: { training_id: id },
-  });
-
+  await EmployeeTraining.destroy({ where: { training_id: id } });
   await training.destroy();
   return true;
 };
@@ -66,7 +57,6 @@ const resolveEmployeeIds = async (payload) => {
       where: { department_id: payload.department_id },
       attributes: ['id'],
     });
-
     return employees.map((e) => e.id);
   }
 
@@ -75,7 +65,6 @@ const resolveEmployeeIds = async (payload) => {
       where: { role: payload.role },
       attributes: ['id'],
     });
-
     return employees.map((e) => e.id);
   }
 
@@ -84,7 +73,6 @@ const resolveEmployeeIds = async (payload) => {
 
 const enrollEmployees = async (trainingId, payload) => {
   const training = await Training.findByPk(trainingId);
-
   if (!training) {
     const err = new Error('Training not found');
     err.status = 404;
@@ -99,16 +87,9 @@ const enrollEmployees = async (trainingId, payload) => {
     throw err;
   }
 
-  // ---------- CHECK CAPACITY ----------
-
   if (training.capacity) {
     const existingCount = await EmployeeTraining.count({
-      where: {
-        training_id: trainingId,
-        completion_status: {
-          [Op.ne]: 'dropped',
-        },
-      },
+      where: { training_id: trainingId, completion_status: { [Op.ne]: 'dropped' } },
     });
 
     const availableSlots = training.capacity - existingCount;
@@ -128,46 +109,24 @@ const enrollEmployees = async (trainingId, payload) => {
     }
   }
 
-  // ---------- CREATE ENROLLMENTS ----------
-
   const rows = employeeIds.map((employee_id) => ({
     training_id: trainingId,
     employee_id,
     completion_status: 'registered',
   }));
 
+  // relies on the unique index on (employee_id, training_id)
   const created = await EmployeeTraining.bulkCreate(rows, {
     ignoreDuplicates: true,
   });
 
-  // ---------- CREATE NOTIFICATIONS ----------
-
-  const notifications = employeeIds.map((employee_id) => ({
-    user_id: employee_id,
-    type: 'training',
-    title: 'New Training Assigned',
-    message: `You have been assigned to the training "${training.title}".`,
-    link: `/training/${trainingId}`,
-  }));
-
-  if (notifications.length) {
-    await Notification.bulkCreate(notifications);
-  }
-
   return created;
 };
-
-// ---------- LIST ENROLLMENTS ----------
 
 const listEnrollmentsForTraining = async (trainingId) => {
   return EmployeeTraining.findAll({
     where: { training_id: trainingId },
-    include: [
-      {
-        model: Employee,
-        attributes: ['id', 'name', 'department_id', 'role'],
-      },
-    ],
+    include: [{ model: Employee, attributes: ['id', 'name', 'department_id', 'role'] }],
     order: [['createdAt', 'ASC']],
   });
 };
@@ -181,10 +140,8 @@ const listEnrollmentsForEmployee = async (employeeId) => {
 };
 
 // payload: { completion_status, certificate_url? }
-
 const updateEnrollmentStatus = async (enrollmentId, payload) => {
   const enrollment = await EmployeeTraining.findByPk(enrollmentId);
-
   if (!enrollment) return null;
 
   const updates = {};
@@ -198,53 +155,33 @@ const updateEnrollmentStatus = async (enrollmentId, payload) => {
   }
 
   await enrollment.update(updates);
-
   return enrollment;
 };
 
 const removeEnrollment = async (enrollmentId) => {
   const enrollment = await EmployeeTraining.findByPk(enrollmentId);
-
   if (!enrollment) return null;
 
   await enrollment.destroy();
-
   return true;
 };
 
 // ---------- COMPLIANCE ----------
 
 const getComplianceSummary = async ({ departmentId } = {}) => {
-  const employeeWhere = departmentId
-    ? { department_id: departmentId }
-    : {};
+  const employeeWhere = departmentId ? { department_id: departmentId } : {};
 
   const enrollments = await EmployeeTraining.findAll({
     include: [
-      {
-        model: Employee,
-        attributes: ['id', 'name', 'department_id'],
-        where: employeeWhere,
-      },
-      {
-        model: Training,
-        attributes: [
-          'id',
-          'title',
-          'start_date',
-          'end_date',
-        ],
-      },
+      { model: Employee, attributes: ['id', 'name', 'department_id'], where: employeeWhere },
+      { model: Training, attributes: ['id', 'title', 'start_date', 'end_date'] },
     ],
   });
 
   const today = new Date();
 
   const overdue = enrollments.filter((e) => {
-    const endDate = e.Training?.end_date
-      ? new Date(e.Training.end_date)
-      : null;
-
+    const endDate = e.Training?.end_date ? new Date(e.Training.end_date) : null;
     return (
       ['registered', 'in_progress'].includes(e.completion_status) &&
       endDate &&
@@ -252,9 +189,7 @@ const getComplianceSummary = async ({ departmentId } = {}) => {
     );
   });
 
-  const completed = enrollments.filter(
-    (e) => e.completion_status === 'completed'
-  );
+  const completed = enrollments.filter((e) => e.completion_status === 'completed');
 
   const complianceRate = enrollments.length
     ? Math.round((completed.length / enrollments.length) * 100)
