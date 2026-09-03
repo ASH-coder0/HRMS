@@ -1,0 +1,161 @@
+const { Op } = require('sequelize');
+const Attendance = require('../../models/Attendance');
+const Employee = require('../../models/Employee');
+const Department = require('../../models/Department');
+const CustomErrorHandler = require('../utils/CustomErrorHandler');
+const { getTodayDateOnly } = require('../helpers/date');
+
+const checkIn = async (employeeId) => {
+  const date = getTodayDateOnly();
+  let record = await Attendance.findOne({ where: { employee_id: employeeId, date } });
+  if (record && record.check_in) throw CustomErrorHandler.validationError('Already checked in today');
+
+  const now = new Date();
+  const isLate = now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 15);
+
+  if (record) {
+    record.check_in = now;
+    record.status = isLate ? 'late' : 'present';
+    await record.save();
+  } else {
+    record = await Attendance.create({
+      employee_id: employeeId,
+      date,
+      check_in: now,
+      status: isLate ? 'late' : 'present',
+    });
+  }
+  return record;
+};
+
+const checkOut = async (employeeId) => {
+  const date = getTodayDateOnly();
+
+  const record = await Attendance.findOne({
+    where: {
+      employee_id: employeeId,
+      date,
+    },
+  });
+
+  if (!record || !record.check_in) {
+    throw CustomErrorHandler.validationError(
+      'You must check in before checking out'
+    );
+  }
+
+  if (record.check_out) {
+    throw CustomErrorHandler.validationError(
+      'Already checked out today'
+    );
+  }
+
+  record.check_out = new Date();
+
+  // Calculate total worked hours
+  const hoursWorked =
+    (record.check_out - new Date(record.check_in)) /
+    (1000 * 60 * 60);
+
+  // Save total hours
+  record.total_hour = Number(hoursWorked.toFixed(2));
+
+  // Calculate overtime
+  if (hoursWorked > 8) {
+    record.overtime_minutes = Math.round(
+      (hoursWorked - 8) * 60
+    );
+  } else {
+    record.overtime_minutes = 0;
+  }
+
+  await record.save();
+
+  return record;
+};
+
+const manualEntry = async (payload) => {
+  const { employee_id, date, status, check_in, check_out, remarks } = payload;
+  const total_hour = check_in && check_out
+    ? Number(((new Date(check_out) - new Date(check_in)) / (1000 * 60 * 60)).toFixed(2))
+    : 0;
+
+  const [record, created] = await Attendance.findOrCreate({
+    where: { employee_id, date },
+    defaults: { status, check_in, check_out, total_hour, remarks, is_manual_entry: true },
+  });
+  if (!created) {
+    await record.update({ status, check_in, check_out, total_hour, remarks, is_manual_entry: true });
+  }
+  return record;
+};
+
+const getAll = async ({ employee_id, department_id, start_date, end_date, status, page = 1, limit = 31 }, role) => {
+  const pageNumber = parseInt(page, 10) || 1;
+  const pageSize = parseInt(limit, 10) || 31;
+
+  const where = {};
+  if (employee_id) where.employee_id = employee_id;
+  if (status) where.status = status;
+  if (start_date && end_date) where.date = { [Op.between]: [start_date, end_date] };
+
+  const employeeWhere = department_id ? { department_id } : undefined;
+
+  const result = await Attendance.findAndCountAll({
+    where,
+    include: [{ model: Employee, where: employeeWhere, include: [Department] }],
+    limit: pageSize,
+    offset: (pageNumber - 1) * pageSize,
+    order: [['date', 'DESC']],
+  });
+
+  const items = role === 'super_admin'
+    ? result.rows
+    : result.rows.map((record) => {
+      const attendance = record.toJSON();
+      delete attendance.total_hour;
+      return attendance;
+    });
+
+  return {
+    items,
+    total: result.count,
+    page: pageNumber,
+    totalPages: Math.ceil(result.count / pageSize),
+  };
+};
+
+const monthlyReport = async ({ employee_id, month, year, start_date, end_date }) => {
+  let start;
+  let end;
+
+  if (start_date && end_date) {
+    // Explicit AD range (e.g. converted from a Bikram Sambat month by the caller).
+    start = start_date;
+    end = end_date;
+  } else {
+    if (!month || !year) throw CustomErrorHandler.validationError('month and year are required');
+
+    const monthNum = Number(month);
+    const yearNum = Number(year);
+    if (monthNum < 1 || monthNum > 12) throw CustomErrorHandler.validationError('month must be between 1 and 12');
+
+    const lastDay = new Date(Date.UTC(yearNum, monthNum, 0)).getUTCDate();
+    const monthPart = String(monthNum).padStart(2, '0');
+    start = `${yearNum}-${monthPart}-01`;
+    end = `${yearNum}-${monthPart}-${String(lastDay).padStart(2, '0')}`;
+  }
+
+  const where = { date: { [Op.between]: [start, end] } };
+  if (employee_id) where.employee_id = employee_id;
+
+  const records = await Attendance.findAll({ where, include: [Employee], order: [['date', 'ASC']] });
+  const summary = records.reduce((acc, r) => {
+    acc[r.status] = (acc[r.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  return { records, summary };
+};
+
+module.exports = { checkIn, checkOut, manualEntry, getAll, monthlyReport };

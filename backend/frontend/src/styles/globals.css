@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 45% 97%;
+  --foreground: 215 30% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 30% 14%;
+  --primary: 211 88% 42%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 30% 95%;
+  --secondary-foreground: 215 30% 20%;
+  --accent: 174 68% 36%;
+  --accent-foreground: 0 0% 100%;
+  --muted: 210 25% 94%;
+  --muted-foreground: 215 15% 45%;
+  --destructive: 358 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 152 55% 38%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 90% 48%;
+  --warning-foreground: 0 0% 100%;
+  --border: 212 24% 88%;
+  --input: 212 24% 88%;
+  --ring: 211 88% 42%;
+  --radius: 0.85rem;
+}
+
+.dark {
+  --background: 216 34% 9%;
+  --foreground: 210 30% 92%;
+  --card: 216 30% 12%;
+  --card-foreground: 210 30% 92%;
+  --primary: 207 85% 58%;
+  --primary-foreground: 216 34% 9%;
+  --secondary: 216 24% 16%;
+  --secondary-foreground: 210 30% 90%;
+  --accent: 174 55% 48%;
+  --accent-foreground: 216 34% 9%;
+  --muted: 216 24% 16%;
+  --muted-foreground: 210 15% 65%;
+  --destructive: 358 65% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 152 45% 48%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 80% 55%;
+  --warning-foreground: 0 0% 100%;
+  --border: 216 22% 20%;
+  --input: 216 22% 20%;
+  --ring: 207 85% 58%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.3); border-radius: 999px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Print only the payroll slip area */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #payslip-print-area,
+  #payslip-print-area * {
+    visibility: visible;
+  }
+
+  #payslip-print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+}
